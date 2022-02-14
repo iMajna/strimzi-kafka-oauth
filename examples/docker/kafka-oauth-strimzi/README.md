@@ -50,15 +50,19 @@ Kafka broker should be available on localhost:9092. It connects to Hydra using `
 To change OPA policies, you can find them within `example/docker/kafka-oauth-strimzi/bundles. 
 In case you want to change ACLs: 
 1. Install OPA client
+
     brew install opa
 2. Build ACLs
+
     opa build --bundle policies/ --output bundles/bundle.tar.gz
 
 Add self signed certs within your local java truststore: 
+
     sudo keytool -import -alias hydra -file ca.crt -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/security/cacerts
 
-`ca.crt`location: /Users/<user>/Documents/Kafka/strimzi-kafka-oauth-0.10.0/examples/docker/hydra-import/ca.crt
-PWD of `cacerts` is usually `changeit`
+`ca.crt`location:   /Users/<user>/Documents/Kafka/strimzi-kafka-oauth-0.10.0/examples/docker/hydra-import/ca.crt
+
+    PWD of `cacerts` is usually `changeit`
 
 
 Running Kafka Client
@@ -76,18 +80,22 @@ Download library which can use  `kafka-console-producer.sh` and within directory
     sasl.login.callback.handler.class=io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler
 
 Export following vars for Kafka Producer Client: 
+    
     export OAUTH_CLIENT_SECRET=kafka-producer-client-secret && export OAUTH_CLIENT_ID=kafka-producer-client
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
 
 Export following vars for Kafka Consumer Client: 
+    
     export OAUTH_CLIENT_SECRET=kafka-consumer-client-secret && export OAUTH_CLIENT_ID=kafka-consumer-client
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
 
 Export following vars for Kafka Broker Client: 
+    
     export OAUTH_CLIENT_SECRET=kafka-broker-secret && export OAUTH_CLIENT_ID=kafka-broker
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
 
 
 Run Kafka Client: 
+    
     bin/kafka-console-producer --bootstrap-server kafka:9092 --topic credit-scores --producer.config producer-oauth.config
 
