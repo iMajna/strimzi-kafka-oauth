@@ -79,12 +79,12 @@ Download library which can use  `kafka-console-producer.sh` and within directory
     sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
     sasl.login.callback.handler.class=io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler
 
-Export following vars for Kafka Producer Client: 
+Export following vars for Kafka Producer Client (based on policy this user can write to any topic): 
     
     export OAUTH_CLIENT_SECRET=kafka-producer-client-secret && export OAUTH_CLIENT_ID=kafka-producer-client
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
 
-Export following vars for Kafka Consumer Client: 
+Export following vars for Kafka Consumer Client (based on policy this user cannot read any topics): 
     
     export OAUTH_CLIENT_SECRET=kafka-consumer-client-secret && export OAUTH_CLIENT_ID=kafka-consumer-client
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
@@ -98,3 +98,5 @@ Export following vars for Kafka Broker Client:
 Run Kafka Client: 
     
     bin/kafka-console-producer --bootstrap-server kafka:9092 --topic credit-scores --producer.config producer-oauth.config
+
+    bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic credit-scores --consumer.config producer-oauth.config --group test-group
