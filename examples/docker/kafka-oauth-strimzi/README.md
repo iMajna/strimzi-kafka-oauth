@@ -67,9 +67,9 @@ Add self signed certs within your local java truststore:
 
 Running Kafka Client
 ---------------------------------------
-Download library which can use  `kafka-console-producer.sh` and within directory create file:
+Download library which can use  `kafka-console-producer.sh` and within directory create file `producer-oauth.config`:
 
-    producer-oauth.config
+    
     oauth.ssl.truststore.location=/Users/<user>/Documents/Kafka/strimzi-kafka-oauth-0.10.0/examples/docker/hydra-import/ca.crt
     oauth.ssl.truststore.type=PEM
     ssl.truststore.location=/Users/<user>/Documents/Kafka/strimzi-kafka-oauth-0.10.0/examples/docker/certificates/ca-truststore.p12
