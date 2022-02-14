@@ -156,8 +156,8 @@ public class ExampleConcurrentProducer {
         final String accessToken = external.getValue(ClientConfig.OAUTH_ACCESS_TOKEN, null);
 
         if (accessToken == null) {
-            defaults.setProperty(Config.OAUTH_CLIENT_ID, "team-a-client");
-            defaults.setProperty(Config.OAUTH_CLIENT_SECRET, "team-a-client-secret");
+            defaults.setProperty(Config.OAUTH_CLIENT_ID, "kafka-producer-client");
+            defaults.setProperty(Config.OAUTH_CLIENT_SECRET, "kafka-producer-client-secret");
         }
     }
 

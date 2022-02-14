@@ -1,10 +1,30 @@
 version: '3.5'
 
 services:
+  #################################### NGINX + OPA ####################################
 
+  nginx:
+    image: nginx:1.21.4
+    volumes:
+      - "./kafka-oauth-strimzi/bundles:/usr/share/nginx/html"
+    ports:
+      - "80:80"
+  opa:
+    image: openpolicyagent/opa:0.35.0-rootless
+    ports:
+      - "8181:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--set=decision_logs.console=true"
+      - "--set=services.authz.url=http://nginx"
+      - "--set=bundles.authz.service=authz"
+      - "--set=bundles.authz.resource=bundle.tar.gz"
+    depends_on:
+      - nginx
   #################################### KAFKA BROKER ####################################
   kafka:
-    image: strimzi/example-kafka
+    image: confluentinc/cp-kafka:6.2.1
     build: kafka-oauth-strimzi/kafka/target
     container_name: kafka
     command:
@@ -29,7 +49,7 @@ services:
       #
       LOG_DIR: /home/kafka/logs
 
-      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: CLIENT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:SASL_PLAINTEXT
@@ -44,12 +64,9 @@ services:
       KAFKA_SUPER_USERS: User:kafka-broker
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-
       #
       # Strimzi OAuth Configuration
       #
-
       # Authentication config
       OAUTH_CLIENT_ID: "kafka-broker"
       OAUTH_CLIENT_SECRET: "kafka-broker-secret"
@@ -68,10 +85,23 @@ services:
       OAUTH_SSL_TRUSTSTORE_TYPE: pkcs12
 
       # Turn off certificate host name check
-      #OAUTH_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      # OAUTH_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
 
       # For start_with_hydra.sh script to know where hydra is listening
       HYDRA_HOST: ${HYDRA_HOST:-hydra}
+
+      # OPA Authorizer settings
+      # Set cache expiry to low value for development in order to see decisions
+      KAFKA_OPA_AUTHORIZER_CACHE_EXPIRE_AFTER_SECONDS: 10
+      KAFKA_OPA_AUTHORIZER_URL: http://opa:8181/v1/data/kafka/authz/allow
+      KAFKA_AUTHORIZER_CLASS_NAME: org.openpolicyagent.kafka.OpaAuthorizer
+      CLASSPATH: "/opt/kafka/libs/*"
+    volumes:
+      - "./kafka-oauth-strimzi/plugin:/plugin"
+    depends_on:
+      - zookeeper
+      - opa
+    restart: on-failure
 
   zookeeper:
     image: strimzi/example-zookeeper
@@ -80,4 +110,6 @@ services:
     ports:
       - 2181:2181
     environment:
-      LOG_DIR: /home/kafka/logs
+      - LOG_DIR=/home/kafka/logs
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOOKEEPER_CLIENT_PORT=2181
