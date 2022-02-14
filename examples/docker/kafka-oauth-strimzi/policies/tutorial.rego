@@ -30,7 +30,7 @@ deny {
 # data could be pulled from external sources like AD, Git, etc.
 #-----------------------------------------------------------------------------
 
-consumer_allowlist = {"pii": {"pii_consumer"}}
+consumer_allowlist = {"pii": {"noup"}}
 
 topic_metadata = {"credit-scores": {"tags": ["pii"]}}
 

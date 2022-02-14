@@ -24,7 +24,7 @@ services:
       - nginx
   #################################### KAFKA BROKER ####################################
   kafka:
-    image: confluentinc/cp-kafka:6.2.1
+    image: quay.io/strimzi/kafka:latest-kafka-2.8.0-arm64
     build: kafka-oauth-strimzi/kafka/target
     container_name: kafka
     command:
@@ -49,7 +49,7 @@ services:
       #
       LOG_DIR: /home/kafka/logs
 
-      KAFKA_BROKER_ID: 2
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: CLIENT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:SASL_PLAINTEXT

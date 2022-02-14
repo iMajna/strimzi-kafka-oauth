@@ -4,7 +4,7 @@ services:
 
   #################################### KAFKA BROKER ####################################
   kafka:
-    image: strimzi/example-kafka
+    image: quay.io/strimzi/kafka:latest-kafka-2.8.0-arm64
     build: kafka-oauth-strimzi/kafka/target
     container_name: kafka
     ports:

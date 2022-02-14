@@ -1,4 +1,4 @@
-FROM quay.io/strimzi/kafka:latest-kafka-3.0.0-arm64
+FROM quay.io/strimzi/kafka:latest-kafka-2.8.0-arm64
 
 COPY libs/* /opt/kafka/libs/strimzi/
 COPY config/* /opt/kafka/config/
