@@ -94,6 +94,21 @@ Export following vars for Kafka Broker Client:
     export OAUTH_CLIENT_SECRET=kafka-broker-secret && export OAUTH_CLIENT_ID=kafka-broker
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
 
+If passing `OAUTH_CLIENT_SECRET` and `OAUTH_CLIENT_ID` is not what you want you can obtain JWT in front and pass it to Kafka as follows: 
+    
+    # Hydra install
+    brew install ory/tap/hydra
+    
+    # Obtain token calling hydra auth api
+    hydra token client  --endpoint https://hydra:4444/ --client-id kafka-producer-client --client-secret kafka-producer-client-secret --skip-tls-verify
+    
+    Result: 
+    <JWT>
+    
+    # export VAR
+    export OAUTH_ACCESS_TOKEN=<jwt>
+ 
+Be aware that `OAUTH_ACCESS_TOKEN` always overrides `OAUTH_CLIENT_SECRET` + `OAUTH_CLIENT_ID`
 
 Run Kafka Client: 
     
