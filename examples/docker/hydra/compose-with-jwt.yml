@@ -22,3 +22,4 @@ services:
       SERVE_TLS_KEY_PATH: /tmp/certs/hydra.key
       SERVE_TLS_CERT_PATH: /tmp/certs/hydra.crt
       STRATEGIES_ACCESS_TOKEN: jwt
+      OIDC_SUBJECT_IDENTIFIERS_SUPPORTED_TYPES: public

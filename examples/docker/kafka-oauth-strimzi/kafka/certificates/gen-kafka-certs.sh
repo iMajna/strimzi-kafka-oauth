@@ -5,7 +5,7 @@ set -e
 STOREPASS=Z_pkTh9xgZovK4t34cGB2o6afT4zZg0L
 
 echo "#### Generate broker keystore"
-keytool -keystore cluster.keystore.p12 -alias localhost -validity 380 -genkey -keyalg RSA -ext SAN=DNS:kafka -dname "CN=my-cluster-kafka,O=io.strimzi" -deststoretype pkcs12 -storepass $STOREPASS -keypass $STOREPASS
+keytool -keystore cluster.keystore.p12 -alias localhost -validity 380 -genkey -keyalg RSA -ext SAN=DNS:kafka -dname "CN=kafka,O=io.strimzi" -deststoretype pkcs12 -storepass $STOREPASS -keypass $STOREPASS
 
 echo "#### Add the CA to the brokers’ truststore"
 keytool -keystore cluster.truststore.p12 -deststoretype pkcs12 -storepass $STOREPASS -alias CARoot -importcert -file ../../../certificates/ca.crt -noprompt

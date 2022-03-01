@@ -45,7 +45,27 @@ From `docker` directory run:
 
     docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-hydra-jwt.yml -f hydra/compose-with-jwt.yml -f hydra-import/compose.yml up --build
 
-Kafka broker should be available on localhost:9092. It connects to Hydra using `https://hydra:4444`
+
+Running using custom made plugin JWT decoding + OPA
+----------------------------------------------
+
+From `docker` directory run:
+
+    docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-plain-jwt.yml up --build
+
+
+Running using custom made plugin JWT decoding and SSL as second listener + OPA
+----------------------------------------------
+
+From `docker` directory run:
+
+    docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-ssl-jwt.yml up --build
+
+In case you are running Hydra then - Kafka broker should be available on localhost:9092. It connects to Hydra using `https://hydra:4444`
+
+In case you are running JWT + SSL then: 
+1. port 9092 is for SSL
+2. port 9093 is for OAUTHBEARER
 
 To change OPA policies, you can find them within `example/docker/kafka-oauth-strimzi/bundles. 
 In case you want to change ACLs: 
@@ -65,7 +85,7 @@ Add self signed certs within your local java truststore:
     PWD of `cacerts` is usually `changeit`
 
 
-Running Kafka Client
+Running Kafka Client with Hydra
 ---------------------------------------
 Download library which can use  `kafka-console-producer.sh` and within directory create file `producer-oauth.config`:
 
@@ -93,6 +113,26 @@ Export following vars for Kafka Broker Client:
     
     export OAUTH_CLIENT_SECRET=kafka-broker-secret && export OAUTH_CLIENT_ID=kafka-broker
     export OAUTH_TOKEN_ENDPOINT_URI=https://hydra:4444/oauth2/token
+
+
+Running Kafka Client with OAUTHBEARER with custom plugin
+---------------------------------------
+Download library which can use  `kafka-console-producer.sh` and within directory create file `producer-oauth.config`:
+
+    
+    security.protocol=SASL_PLAINTEXT
+    sasl.mechanism=OAUTHBEARER
+    sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
+    sasl.login.callback.handler.class=io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler
+
+Export following vars for Kafka Producer Client (based on policy this user can write to any topic): 
+    
+    export OAUTH_ACCESS_TOKEN=<JWT>
+
+Export following vars for Kafka Consumer Client (based on policy this user cannot read any topics): 
+    
+    export OAUTH_ACCESS_TOKEN=<JWT>
+
 
 
 Run Kafka Client: 

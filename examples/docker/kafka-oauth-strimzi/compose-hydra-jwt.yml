@@ -40,7 +40,7 @@ services:
     environment:
 
       # Java Debug
-      #KAFKA_DEBUG: y
+      KAFKA_DEBUG: n
       #DEBUG_SUSPEND_FLAG: y
       #JAVA_DEBUG_PORT: 5005
 

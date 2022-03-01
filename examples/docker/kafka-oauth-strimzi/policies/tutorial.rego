@@ -1,79 +1,120 @@
-#-----------------------------------------------------------------------------
-# High level policy for controlling access to Kafka.
-#
-# * Deny operations by default.
-# * Allow operations if no explicit denial.
-#
-# The kafka-authorizer-opa plugin will query OPA for decisions at
-# /kafka/authz/allow. If the policy decision is _true_ the request is allowed.
-# If the policy decision is _false_ the request is denied.
-#-----------------------------------------------------------------------------
 package kafka.authz
 
 import future.keywords.in
 
+# ----------------------------------------------------
+#  Policies
+# ----------------------------------------------------
+
 default allow = false
 
 allow {
-	not deny
+	inter_broker_communication
 }
 
-deny {
-	is_read_operation
-	topic_contains_pii
-	not consumer_is_allowlisted_for_pii
+allow {
+	consume(input.action)
+	on_own_topic(input.action)
+	as_consumer
 }
 
-#-----------------------------------------------------------------------------
-# Data structures for controlling access to topics. In real-world deployments,
-# these data structures could be loaded into OPA as raw JSON data. The JSON
-# data could be pulled from external sources like AD, Git, etc.
-#-----------------------------------------------------------------------------
-
-consumer_allowlist = {"pii": {"noup"}}
-
-topic_metadata = {"credit-scores": {"tags": ["pii"]}}
-
-#-----------------------------------
-# Helpers for checking topic access.
-#-----------------------------------
-
-topic_contains_pii {
-	"pii" in topic_metadata[topic_name].tags
+allow {
+	produce(input.action)
+	on_own_topic(input.action)
+	as_producer
 }
 
-consumer_is_allowlisted_for_pii {
-	principal.name in consumer_allowlist.pii
+allow {
+	create(input.action)
+	on_own_topic(input.action)
 }
 
-#-----------------------------------------------------------------------------
-# Helpers for processing Kafka operation input. This logic could be split out
-# into a separate file and shared. For conciseness, we have kept it all in one
-# place.
-#-----------------------------------------------------------------------------
-
-is_write_operation {
-    input.action.operation == "WRITE"
+allow {
+	any_operation(input.action)
+	on_own_topic(input.action)
+	as_mgmt_user
 }
 
-is_read_operation {
+allow {
 	input.action.operation == "READ"
+	input.action.resourcePattern.resourceType == "GROUP"
 }
 
-is_topic_resource {
-	input.action.resourcePattern.resourceType == "TOPIC"
+allow {
+	describe(input.action)
 }
 
-topic_name = input.action.resourcePattern.name {
-	is_topic_resource
+# ----------------------------------------------------
+#  Functions
+# ----------------------------------------------------
+
+inter_broker_communication {
+	input.requestContext.principal.name == "ANONYMOUS"
 }
 
-principal = {"fqn": parsed.CN, "name": cn_parts[0]} {
-	parsed := parse_user(input.requestContext.principal.name)
+inter_broker_communication {
+	input.requestContext.securityProtocol == "SSL"
+	input.requestContext.principal.principalType == "User"
+	username == "localhost"
+}
+
+consume(action) {
+	action.operation == "READ"
+}
+
+produce(action) {
+	action.operation == "WRITE"
+}
+
+create(action) {
+	action.operation == "CREATE"
+}
+
+describe(action) {
+	action.operation == "DESCRIBE"
+}
+
+any_operation(action) {
+	action.operation in ["READ", "WRITE", "CREATE", "ALTER", "DESCRIBE", "DELETE"]
+}
+
+as_consumer {
+	regex.match(".*-client", username)
+}
+
+as_producer {
+	regex.match(".*-client", username)
+}
+
+as_mgmt_user {
+	regex.match(".*-mgmt", username)
+}
+
+on_own_topic(action) {
+	owner := trim(username, "-client")
+	regex.match(owner, action.resourcePattern.name)
+}
+
+on_own_topic(action) {
+	owner := trim(username, "-client")
+	regex.match(owner, action.resourcePattern.name)
+}
+
+on_own_topic(action) {
+	owner := trim(username, "-mgmt")
+	regex.match(owner, action.resourcePattern.name)
+}
+
+username = cn_parts[0] {
+	name := input.requestContext.principal.name
+	startswith(name, "CN=")
+	parsed := parse_user(name)
 	cn_parts := split(parsed.CN, ".")
-} 
+}
 # If client certificates aren't used for authentication
-else = {"fqn": "", "name": input.requestContext.principal.name}
+else = input.requestContext.principal.name {
+	true
+}
 
 parse_user(user) = {key: value |
 	parts := split(user, ",")
