@@ -45,38 +45,6 @@ From `docker` directory run:
 
     docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-hydra-jwt.yml -f hydra/compose-with-jwt.yml -f hydra-import/compose.yml up --build
 
-
-Running using custom made plugin JWT decoding + OPA
-----------------------------------------------
-
-From `docker` directory run:
-
-    docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-plain-jwt.yml up --build
-
-
-Running using custom made plugin JWT decoding and SSL as second listener + OPA
-----------------------------------------------
-
-From `docker` directory run:
-
-    docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-ssl-jwt.yml up --build
-
-In case you are running Hydra then - Kafka broker should be available on localhost:9092. It connects to Hydra using `https://hydra:4444`
-
-In case you are running JWT + SSL then: 
-1. port 9092 is for SSL
-2. port 9093 is for OAUTHBEARER
-
-To change OPA policies, you can find them within `example/docker/kafka-oauth-strimzi/bundles. 
-In case you want to change ACLs: 
-1. Install OPA client
-
-    brew install opa
-2. Build ACLs
-
-    opa build --bundle policies/ --output bundles/bundle.tar.gz
-
-
 [For Hydra Deployments] 
 
 Add self signed certs within your local java truststore: 
@@ -132,6 +100,29 @@ If passing `OAUTH_CLIENT_SECRET` and `OAUTH_CLIENT_ID` is not what you want you 
     export OAUTH_ACCESS_TOKEN=<jwt>
  
 Be aware that `OAUTH_ACCESS_TOKEN` always overrides `OAUTH_CLIENT_SECRET` + `OAUTH_CLIENT_ID`
+
+
+Running using custom made plugin JWT decoding and SSL as second listener + OPA
+----------------------------------------------
+
+From `docker` directory run:
+
+    docker-compose -f compose.yml -f kafka-oauth-strimzi/compose-ssl-jwt.yml up --build
+
+In case you are running Hydra then - Kafka broker should be available on localhost:9092. It connects to Hydra using `https://hydra:4444`
+
+In case you are running JWT + SSL then: 
+1. port 9092 is for SSL
+2. port 9093 is for OAUTHBEARER
+
+To change OPA policies, you can find them within `example/docker/kafka-oauth-strimzi/bundles. 
+In case you want to change ACLs: 
+1. Install OPA client
+
+    brew install opa
+2. Build ACLs
+
+    opa build --bundle policies/ --output bundles/bundle.tar.gz
         
 
 Running Kafka Client with OAUTHBEARER with custom plugin
