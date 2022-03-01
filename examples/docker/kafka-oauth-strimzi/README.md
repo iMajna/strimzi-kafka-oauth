@@ -76,6 +76,9 @@ In case you want to change ACLs:
 
     opa build --bundle policies/ --output bundles/bundle.tar.gz
 
+
+[For Hydra Deployments] 
+
 Add self signed certs within your local java truststore: 
 
     sudo keytool -import -alias hydra -file ca.crt -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/security/cacerts
@@ -129,6 +132,7 @@ If passing `OAUTH_CLIENT_SECRET` and `OAUTH_CLIENT_ID` is not what you want you 
     export OAUTH_ACCESS_TOKEN=<jwt>
  
 Be aware that `OAUTH_ACCESS_TOKEN` always overrides `OAUTH_CLIENT_SECRET` + `OAUTH_CLIENT_ID`
+        
 
 Running Kafka Client with OAUTHBEARER with custom plugin
 ---------------------------------------
